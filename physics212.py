@@ -86,6 +86,57 @@ class Vector2:
 	def unit_vector(self):
 		return self / self.magnitude()
 
+class Vector3(Vector2):
+	
+	__slots__ = ("x", "y", "z")
+
+	def __init__(self,x,y,z):
+		self.x = x
+		self.y = y
+		self.z = z
+			
+	def __mul__(self, other):
+		number = toNumber(other)
+		if type(number) == Number:
+			return Vector2(self.x * other, self.y * other)
+		elif type(number) == Vector2:
+			return toNumber(self.x * other.x + self.y * other.y)
+		elif type(number) == Vector3:
+			return toNumber(self.x * other.x + self.y * other.y, self.z * other.z)
+		else:
+			raise ValueError("vector * %s operation is undefined" % other)
+	
+	def xMul(self, other):
+		if type(other) == Vector3:
+			return Vector3(self.y*other.z-self.z*other.y, other.z*self.x-self.z*other.x, self.x*other.y-self.y*other.x)
+		else:
+			raise ValueError("crossMul with %s is not supported", type(other))
+
+	def __str__(self):
+		return "%s i + %s j + %s k" % (self.x, self.y, self.z)
+
+class Variable:
+	__slots__ = "name"
+
+	def __init__(self, name):
+		self.name = name
+
+
+class Expression:
+	__slots__ = "operator", "variables"
+
+	def __init__(self, var1, operator=None, *variables):
+		self.operator = operator
+		self.variables = [var1] + list(variables)
+
+
+class Equation:
+	__slots__ = "expression1", "expression2"
+
+	def __init__(self, expression1, expression2):
+		self.expression1 = expression1
+		self.expression2 = expression2
+
 
 # constants
 K_const = Number(8.99, 9)
@@ -112,6 +163,8 @@ def toNumber(var):
 	if type(var) == Number:
 		return var
 	if type(var) == Vector2:
+		return var
+	if type(var) == Vector3:
 		return var
 	try:
 		float(var)
